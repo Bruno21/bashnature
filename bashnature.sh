@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-VERSION="v0.6"
+VERSION="v0.6.1"
 
 ### Variables for self updating
 ScriptArgs=( "$@" )
@@ -56,9 +56,12 @@ Help() {
   echo "Options:"
   echo "-s     -s <subject>, -s all."
   echo "-h     Print this Help."
-  echo "-e     Export markdown."
-  echo "-v     Prints current version."
-  echo "-w     Export html."
+  echo "-m     Display male name."
+  echo "-f     Display female name."
+  echo "-j     Display juvenile name."
+  #echo "-e     Export markdown."
+  echo "-u     Prints current version and update (if available)."
+  #echo "-w     Export html."
 }
 
 req2() {
