@@ -11,15 +11,19 @@ opt_male=false
 opt_femelle=false
 opt_jeune=false
 
+# Get GITHUB_TOKEN from keychain with fnox
+[[ -z "${GITHUB_TOKEN}" ]] && echo -e "${red}\nNo Github token found ! Could'nt get update from Github.'.${reset}\n"
+
 dotenv () {
   set -a
   # shellcheck disable=SC1091
-  [ -f "$ScriptWorkDir/.env" ] && . "$ScriptWorkDir/.env" || echo -e "${red}\nNo .env file found ! Could'nt get update from Github.'.${reset}"
+  [ -f "$ScriptWorkDir/.env" ] && . "$ScriptWorkDir/.env" || echo -e "${red}\nNo .env file found ! Could'nt get update from Github.'.${reset}\n"
   set +a
 }
 
-dotenv
+#dotenv # replaced by fnox
 
+### ChangeNotes: 0.6	Replace .env file by fnox
 ### ChangeNotes: 0.5	First version.
 
 Github="https://github.com/bruno21/bashnature"
@@ -47,10 +51,10 @@ echo -e "${yellowbold}Bashnature${reset} $VERSION\n"
 ### Help Function:
 Help() {
   echo "Syntax:     bashnature.sh [OPTION]" 
-  echo "Example:    bashanimals.sh -a renard"
+  echo "Example:    bashnature.sh -s renard"
   echo
   echo "Options:"
-  echo "-a     -a <animal>, -a all."
+  echo "-s     -s <subject>, -s all."
   echo "-h     Print this Help."
   echo "-e     Export markdown."
   echo "-v     Prints current version."
