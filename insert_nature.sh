@@ -23,6 +23,8 @@ fi
 
 #files=()
 
+j=0
+
 for FILE in "$SRC"/*.csv
 do
 	x=$(basename "${FILE}")
@@ -39,7 +41,12 @@ do
 		typ="Plante,Plant"
 	fi
 	
+	i=0
 	skip_headers=1
+	
+	# the .csv separator must be a ;
+	# only LibreOffice or Apple Number allow this (Excel forces the , as separator)
+	
 	while IFS=';' read -ra array;
 	do
 	   if ((skip_headers)); then   # Ne pas lire le header
@@ -64,6 +71,7 @@ do
             lien="${array[15]}"
 
             fr=$(echo "$fr" | sed "s/'/''/g")
+            #echo "$fr"
             fr_wa=$(echo "$fr_wa" | sed "s/'/''/g")
             aut=$(echo "$aut" | sed "s/'/''/g")
             aut_wa=$(echo "$aut_wa" | sed "s/'/''/g")
@@ -73,21 +81,35 @@ do
             jeune=$(echo "$jeune" | sed "s/'/''/g")
             
             others=$(echo "$others" | sed "s/'/''/g")
-            
+            #echo "$others"
             english=$(echo "$english" | sed "s/'/''/g")
             
             ordre=$(echo "$ordre" | sed "s/'/''/g")
             famille=$(echo "$famille" | sed "s/'/''/g")
             
+            #echo "$lien"
+            #echo "$typ"
             
             cmd1="INSERT OR REPLACE INTO liste (Francais, Fra, Autres, Aut, Male, Femelle, Jeune, Others, Latin, Anglais, Male_en, Femelle_en, Jeune_en, Ordre, Famille, Liens, Divers) VALUES ('$fr','$fr_wa','$aut','$aut_wa','$male','$femelle','$jeune','$others','$latin','$english','$male_en','$femelle_en','$jeune_en','$ordre','$famille','$lien','$typ');"
            
             #echo "$cmd1"
             echo "$cmd1" | sqlite3 "./$database"
+            if [ ! $? -eq 0 ]; then
+  				echo "$cmd1" >> errors.txt
+  				echo "" >> errors.txt
+  			else
+				((i++))
+  			fi
+
+			#echo "-------"
 		fi
+		
 
 	done < <(grep "" "${FILE}")    # lit la dernière ligne même si elle n'est pas vide
+	
+	echo -e "${green}Insert $i lines from ${FILE}${reset}\n"
+	j=$((j+i))
 
 done
 
-
+echo -e "\n${greenbold}$j lines inserted in database $database ${reset}\n"

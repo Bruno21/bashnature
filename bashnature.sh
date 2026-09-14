@@ -23,6 +23,7 @@ dotenv () {
 
 #dotenv # replaced by fnox
 
+### ChangeNotes: 0.6.1	Update help
 ### ChangeNotes: 0.6	Replace .env file by fnox
 ### ChangeNotes: 0.5	First version.
 
@@ -402,9 +403,6 @@ check_version() {
 		LatestRelease="$(curl -s -r 0-50 $RawUrl | sed -n "/VERSION/s/VERSION=//p" | tr -d '"')"
 		#LatestChanges="$(curl -s -r 0-2000 $RawUrl | sed -n "/ChangeNotes/s/# ChangeNotes: //p")"
 		LatestChanges="$(curl -s -r 0-2000 $RawUrl | grep "^### ChangeNotes:" | sed 's/### ChangeNotes://g')"
-
-echo "$LatestRelease"
-echo "$LatestChanges"
 
 		### Version check & initiate self update
 		if [[ "$VERSION" != "$LatestRelease" ]] ; then 
