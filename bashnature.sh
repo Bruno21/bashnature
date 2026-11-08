@@ -339,7 +339,7 @@ EOF
 }
 
 req1() {
-	echo -e "${bold}Recherche: <$1>${reset}"
+	echo -e "${bold}Search: <$1>${reset}"
 
 	request="$1"
 	if [[ "${request,,}" == "all" ]]; then

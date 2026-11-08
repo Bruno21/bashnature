@@ -32,7 +32,7 @@ j=0
 for FILE in "$SRC"/*.csv
 do
 	x=$(basename "${FILE}")
-	echo -e "\nInsertion des données du fichier ${underline}$x${reset} dans la base ${bold}$database${reset}...\n"
+	echo -e "\nInserting data from file ${underline}$x${reset} into database ${bold}$database${reset}...\n"
 	#files+=("${FILE}")
 
 	if [[ "$FILE" == *Insectes* ]]; then
@@ -56,7 +56,7 @@ do
 
 	while IFS=';' read -ra array;
 	do
-	   if ((skip_headers)); then   # Ne pas lire le header
+	   if ((skip_headers)); then   # Skip the header row
 		((skip_headers--))
         else
 
@@ -117,7 +117,7 @@ do
 		fi
 
 
-	done < <(grep "" "${FILE}")    # lit la dernière ligne même si elle n'est pas vide
+	done < <(grep "" "${FILE}")    # reads the last line even when it has no trailing newline
 
 	echo -e "${green}Insert $i lines from ${FILE}${reset}\n"
 	j=$((j+i))
