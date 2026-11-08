@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-VERSION="v1.0"
+VERSION="v1.1"
 
 ### Variables for self updating
 ScriptArgs=( "$@" )
@@ -31,6 +31,7 @@ dotenv () {
 
 #dotenv # replaced by fnox
 
+### ChangeNotes: 1.1	Recherche des noms à apostrophe corrigée, test de sqlite3, comparaison de versions, README (Claude)
 ### ChangeNotes: 1.0	Ajout d'un champ recherche dans l'export HTML (Claude)
 ### ChangeNotes: 0.7	Débugage avec Claude
 ### ChangeNotes: 0.6.1	Update help
