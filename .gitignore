@@ -14,3 +14,6 @@ fnox.toml
 # Backups, including the copy kept by the self-update
 /Nature.bak.xls
 *.bak
+
+# macOS directory metadata
+.DS_Store
