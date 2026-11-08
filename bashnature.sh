@@ -70,12 +70,12 @@ req2() {
   	w) ext=".html";old_index="_" ;;
 	esac
 
-	f="liste_mammiferes$ext"
+	f="liste_nature$ext"
 	if [ -f "./$f" ]; then
 		rm "./$f"
 	fi
 
-    query2="SELECT Francais, Autres, Latin, Anglais, Ordre, Famille, Liens, Male, Femelle, Jeune FROM liste;"
+    query2="SELECT Francais, Autres, Latin, Anglais, Ordre, Famille, Liens, Male, Femelle, Jeune FROM liste ORDER by Francais;"
     result2=$(sqlite3 "$ScriptWorkDir/nature.db" "$query2")
     #echo "$result2"
 
@@ -179,7 +179,7 @@ cat > liste_mammiferes.html << EOF
 <head>
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta charset="utf-8">
-<title>Liste mammifères...</title>
+<title>Liste insectes / oiseaux / mammifères...</title>
 <meta name="description" content="">
 <meta name="author" content="">
 <meta name="viewport" content="width=device-width, initial-scale=1">
