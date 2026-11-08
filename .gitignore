@@ -1,2 +1,5 @@
 .env
 fnox.toml
+/.markdownlint.yaml
+/.pre-commit-config.yaml
+/.shellcheckrc
