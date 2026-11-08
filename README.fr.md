@@ -140,10 +140,12 @@ le fichier après avoir conservé une copie `.bak`. Le dépôt étant privé,
 `GITHUB_TOKEN` doit être présent dans l'environnement ; le script l'attend du
 porte-clés via fnox.
 
-Une réserve : la comparaison est une simple inégalité de chaînes et ne
-détermine pas laquelle des deux versions est la plus récente. Incrémenter
-`VERSION` en local sans pousser amène `-u` à proposer une mise à jour qui
-ferait régresser le script. Poussez l'incrément d'abord.
+Les versions sont comparées champ par champ comme des nombres : `v1.10` passe
+donc après `v1.9`, et un champ absent compte pour zéro, ce qui rend `v1.0` et
+`v1.0.0` équivalents. Une mise à jour n'est proposée que si le dépôt est
+réellement en avance. Une version locale en avance sur le dépôt est signalée
+comme telle, et une réponse illisible comme version interrompt la vérification
+au lieu de proposer quoi que ce soit.
 
 ## Fichiers du dépôt
 

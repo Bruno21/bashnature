@@ -466,6 +466,24 @@ self_update() {
   fi
 }
 
+### Compares dotted versions field by field; true when the first is strictly older
+version_lt() {
+	local a="${1#v}" b="${2#v}"
+	[ "$a" = "$b" ] && return 1
+	local -a va vb
+	IFS=. read -ra va <<< "$a"
+	IFS=. read -ra vb <<< "$b"
+	local i n=${#va[@]}
+	[ "${#vb[@]}" -gt "$n" ] && n=${#vb[@]}
+	for ((i = 0; i < n; i++)); do
+		# A missing field counts as 0, so 1.0 and 1.0.0 are equal
+		local na="${va[i]:-0}" nb="${vb[i]:-0}"
+		((10#$na < 10#$nb)) && return 0
+		((10#$na > 10#$nb)) && return 1
+	done
+	return 1
+}
+
 check_version() {
 	curl -Is https://www.github.com | head -1 | grep 301 1>/dev/null
 	if [[ $? -eq 1 ]]; then
@@ -477,13 +495,23 @@ check_version() {
 		#LatestChanges="$(curl -s -r 0-2000 "$RawUrl" | sed -n "/ChangeNotes/s/# ChangeNotes: //p")"
 		LatestChanges="$(curl -s -r 0-2000 "$RawUrl" | grep "^### ChangeNotes:" | sed 's/### ChangeNotes://g')"
 
+		### A missing token or an error page yields something that is not a version
+		if ! [[ "$LatestRelease" =~ ^v?[0-9]+(\.[0-9]+)*$ ]] ; then
+			echo -e "\n${red}Could not read the version in the repository !${reset}"
+			return 1
+		fi
+
 		### Version check & initiate self update
-		if [[ "$VERSION" != "$LatestRelease" ]] ; then
+		if version_lt "$VERSION" "$LatestRelease" ; then
 			printf "New version available! %b%s%b ⇒ %b%s%b \nChange Notes:\n%s \n" "${yellow}" "$VERSION" "${reset}" "${green}" "$LatestRelease" "${reset}" "$LatestChanges"
 			if [[ -z "$AutoUp" ]] ; then
 				read -r -p "Would you like to update? y/[n]: " SelfUpdate
     			[[ "$SelfUpdate" =~ [yY] ]] && self_update
   			fi
+		elif [[ "$VERSION" != "$LatestRelease" ]] ; then
+			printf "Local version %b%s%b is ahead of the repository (%b%s%b). Nothing to update.\n" "${yellow}" "$VERSION" "${reset}" "${green}" "$LatestRelease" "${reset}"
+		else
+			printf "Already up to date (%b%s%b).\n" "${green}" "$VERSION" "${reset}"
 		fi
 	fi
 }

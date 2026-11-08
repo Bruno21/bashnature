@@ -134,9 +134,11 @@ it downloads the file and keeps a `.bak` copy first. The repository is private,
 so `GITHUB_TOKEN` must be in the environment; the script expects it from the
 keychain through fnox.
 
-One caveat: the comparison is a plain string inequality and does not work out
-which version is newer. Bumping `VERSION` locally without pushing makes `-u`
-offer an update that would downgrade the script. Push the bump first.
+Versions are compared field by field as numbers, so `v1.10` ranks above `v1.9`
+and a missing field counts as zero, making `v1.0` and `v1.0.0` equal. An update
+is only offered when the repository is genuinely ahead. A local version ahead of
+the repository is reported as such, and a reply that cannot be read as a version
+aborts the check instead of offering anything.
 
 ## Repository files
 
