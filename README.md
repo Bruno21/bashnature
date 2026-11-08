@@ -140,6 +140,11 @@ is only offered when the repository is genuinely ahead. A local version ahead of
 the repository is reported as such, and a reply that cannot be read as a version
 aborts the check instead of offering anything.
 
+Every request appends a timestamped parameter, because the raw file is served
+from a cache that holds for a few minutes. Without it a fresh push stays
+invisible to `-u`, and the download could fetch an older copy than the one just
+announced.
+
 ## Repository files
 
 | Path | Role |
@@ -151,3 +156,5 @@ aborts the check instead of offering anything.
 | `bashnature.html` | generated HTML export |
 | `bashnature.md` | generated Markdown export |
 | `errors.txt` | generated, failed inserts only |
+| `README.md` | this document |
+| `README.fr.md` | French translation |

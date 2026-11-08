@@ -147,6 +147,11 @@ réellement en avance. Une version locale en avance sur le dépôt est signalée
 comme telle, et une réponse illisible comme version interrompt la vérification
 au lieu de proposer quoi que ce soit.
 
+Chaque requête ajoute un paramètre horodaté, le fichier brut étant servi par un
+cache qui tient quelques minutes. Sans lui, un push récent reste invisible pour
+`-u`, et le téléchargement peut récupérer une copie plus ancienne que celle qui
+vient d'être annoncée.
+
 ## Fichiers du dépôt
 
 | Chemin | Rôle |
@@ -158,3 +163,5 @@ au lieu de proposer quoi que ce soit.
 | `bashnature.html` | export HTML généré |
 | `bashnature.md` | export Markdown généré |
 | `errors.txt` | généré, insertions en échec uniquement |
+| `README.md` | version anglaise |
+| `README.fr.md` | ce document |
