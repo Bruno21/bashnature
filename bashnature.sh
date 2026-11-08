@@ -435,15 +435,21 @@ req1() {
     }
 
 
+### raw.githubusercontent.com caches for a few minutes, so a push stays invisible
+### without a parameter that makes each request unique
+raw_url() {
+  printf '%s?cb=%s' "$RawUrl" "$(date +%s)"
+}
+
 self_update_curl() {
   cp "$ScriptPath" "$ScriptPath".bak
   if [[ $(builtin type -P curl) ]]; then
-    curl -L "$RawUrl" > "$ScriptPath" ; chmod +x "$ScriptPath"
+    curl -L "$(raw_url)" > "$ScriptPath" ; chmod +x "$ScriptPath"
     printf "\n%s\n" "--- starting over with the updated version ---"
     exec "$ScriptPath" "${ScriptArgs[@]}"  # run the new script with old arguments
     exit 1 # exit the old instance
   elif [[ $(builtin type -P wget) ]]; then
-    wget "$RawUrl" -O "$ScriptPath" ; chmod +x "$ScriptPath"
+    wget "$(raw_url)" -O "$ScriptPath" ; chmod +x "$ScriptPath"
     printf "\n%s\n" "--- starting over with the updated version ---"
     exec "$ScriptPath" "${ScriptArgs[@]}" # run the new script with old arguments
     exit 1 # exit the old instance
@@ -492,9 +498,9 @@ check_version() {
 	else
 
 		### Check if there's a new release of the script:
-		LatestRelease="$(curl -s -r 0-50 "$RawUrl" | sed -n "/VERSION/s/VERSION=//p" | tr -d '"')"
+		LatestRelease="$(curl -s -r 0-50 "$(raw_url)" | sed -n "/VERSION/s/VERSION=//p" | tr -d '"')"
 		#LatestChanges="$(curl -s -r 0-2000 "$RawUrl" | sed -n "/ChangeNotes/s/# ChangeNotes: //p")"
-		LatestChanges="$(curl -s -r 0-2000 "$RawUrl" | grep "^### ChangeNotes:" | sed 's/### ChangeNotes://g')"
+		LatestChanges="$(curl -s -r 0-2000 "$(raw_url)" | grep "^### ChangeNotes:" | sed 's/### ChangeNotes://g')"
 
 		### A missing token or an error page yields something that is not a version
 		if ! [[ "$LatestRelease" =~ ^v?[0-9]+(\.[0-9]+)*$ ]] ; then
