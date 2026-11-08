@@ -57,16 +57,16 @@ Help() {
   echo "-m     Display male name."
   echo "-f     Display female name."
   echo "-j     Display juvenile name."
-  #echo "-e     Export markdown."
+  echo "-e     Export markdown."
   echo "-u     Prints current version and update (if available)."
-  #echo "-w     Export html."
+  echo "-w     Export html."
 }
 
 req2() {
 	option=$1
 
 	case $option in
-  	e) ext=".md" ;;
+  	e) ext=".md";old_index="_" ;;
   	w) ext=".html";old_index="_" ;;
 	esac
 
@@ -75,11 +75,12 @@ req2() {
 		rm "./$f"
 	fi
 
-    query2="SELECT Francais, Autres, Latin, Anglais, Ordre, Famille, Liens, Male, Femelle, Jeune FROM liste ORDER by Francais;"
+    query2="SELECT Francais, Autres, Latin, Anglais, Ordre, Famille, Liens, Male, Femelle, Jeune, Fra FROM liste ORDER by Fra;"
     result2=$(sqlite3 "$ScriptWorkDir/nature.db" "$query2")
     #echo "$result2"
 
 	index=()
+	itemcount=0
     array=()
    	while IFS='|' read -ra array;
 	do
@@ -95,10 +96,29 @@ req2() {
         ma="${array[7]}"
         fe="${array[8]}"
         je="${array[9]}"
+        fra="${array[10]}"
 
 
 
         [[ $aut != "" ]] && z="($aut)" || z=""
+
+        # Link label follows the target site, empty when there is no URL
+        case "${ln// /}" in
+        	"") linklabel="" ;;
+        	*oiseaux.net*) linklabel="Oiseaux.net" ;;
+        	*wikipedia*) linklabel="Wikipedia" ;;
+        	*) linklabel="Web" ;;
+        esac
+
+        # Section letter comes from the accent-free name, so É entries sit under E
+        firstletter="${fra:0:1}"
+        if [ "$firstletter" != "$old_index" ]; then
+        	index+=("$firstletter")
+        	letterid="lettre-${#index[@]}"
+        	newletter=true
+        else
+        	newletter=false
+        fi
 
 		if [ "$ext" = ".md" ]; then
 
@@ -111,39 +131,69 @@ req2() {
         	#echo "| $ln |" >> "$f"
         	#echo "" >> "$f"
 
+        	# Letter heading with an explicit anchor, independent of the renderer's slug rules
+        	if [ "$newletter" = true ]; then
+        		mammiferes+="<a id='$letterid'></a>"'\n''\n'"## $firstletter"'\n''\n'
+        	fi
+
         	mammiferes+="| $fr | $z |"'\n'
         	mammiferes+="|------------------------ | --------------------------|"'\n'
         	mammiferes+="| Vernaculaire | $lat |"'\n'
         	mammiferes+="| Anglais | $en |"'\n'
-        	mammiferes+="| Male | $ma |"'\n'
-        	mammiferes+="| Femelle | $fe |"'\n'
-        	mammiferes+="| Jeune | $je |"'\n'
+        	[ -n "$ma" ] && mammiferes+="| Male | $ma |"'\n'
+        	[ -n "$fe" ] && mammiferes+="| Femelle | $fe |"'\n'
+        	[ -n "$je" ] && mammiferes+="| Jeune | $je |"'\n'
         	mammiferes+="| Ordre | $or |"'\n'
         	mammiferes+="| Famille | $fa |"'\n'
         	#birds+="| Liens (oiseaux.net)<br />![](/Users/bruno/Pictures/Transparent300px.png) | [$fr]($ln)<br />![](/Users/bruno/Pictures/Transparent300px.png) |"'\n'
-        	mammiferes+="| Liens (wikipedia)<br />![](Transparent300px.png) | [$fr]($ln)<br />![](Transparent300px.png) |"'\n'
+        	[ -n "$linklabel" ] && mammiferes+="| Liens ($linklabel)<br />![](Transparent300px.png) | [$fr]($ln)<br />![](Transparent300px.png) |"'\n'
         	mammiferes+='\n'
 
         elif [ "$ext" = ".html" ]; then
 
-       		firstletter="${fr:0:1}"
+        	# Link cell left empty when there is no URL
+        	if [ -n "$linklabel" ]; then
+        		linkcell="<a href='$ln'>$linklabel</a>"
+        	else
+        		linkcell=""
+        	fi
 
-        	if [ "$firstletter" != "$old_index" ]; then
-        		index+=("$firstletter")
-        		#bird+="<tr class='bird'><td class='bold'><a href='#$firstletter'></a>$fr</td><td>$aut</td><td>$lat</td><td>$en</td></tr>"
-        		bird+="<tr class='bird'><td class='bold'><a id='$firstletter'></a>$fr</td><td>$aut</td><td>$lat</td><td>$en</td></tr>"
+        	# Third row: gendered names, symbols only shown when data exists
+        	if [ -n "$ma$fe$je" ]; then
+        		row3="<tr class='family'><td>"
+        		[ -n "$ma" ] && row3+="♂ $ma"
+        		row3+="</td><td>"
+        		[ -n "$fe" ] && row3+="♀ $fe"
+        		row3+="</td><td>"
+        		[ -n "$je" ] && row3+="⚥ $je"
+        		row3+="</td><td></td></tr>"
         	else
-        		bird+="<tr class='bird'><td class='bold'>$fr</td><td>$aut</td><td>$lat</td><td>$en</td></tr>"
+        		row3="<tr class='family'><td colspan='4'></td></tr>"
         	fi
-        	bird+="<tr class='family'><td>$or</td><td>$fa</td><td></td><td><a href='$ln'>Wikipedia</a></tr>"
-        	if [ "$firstletter" != "$old_index" ]; then
+
+        	# Anchor on the first item of each letter, targeted by the index links
+        	if [ "$newletter" = true ]; then
+        		#anchor="<a href='#$firstletter'></a>"
+        		anchor="<a id='$firstletter'></a>"
+        	else
+        		anchor=""
+        	fi
+
+        	bird+="<tbody class='item'>"
+        	bird+="<tr class='bird'><td class='bold'>$anchor$fr</td><td>$aut</td><td>$lat</td><td>$en</td></tr>"
+        	bird+="<tr class='family'><td>$or</td><td>$fa</td><td></td><td>$linkcell</tr>"
+        	bird+="$row3"
+        	bird+="</tbody>"
+
+        	# Index bar repeated every 25 items
+        	itemcount=$((itemcount+1))
+        	if [ $((itemcount % 25)) -eq 0 ]; then
         		bird+="<tr class='family textcenter'><td colspan='4'>PLACEHOLDER</td></tr>"
-        	else
-        		bird+="<tr class='family'><td colspan='4'></td></tr>"
         	fi
-        	old_index="$firstletter"
 
         fi
+
+        old_index="$firstletter"
 
     done <<< "$result2"
 
@@ -162,8 +212,14 @@ req2() {
     elif [ "$ext" = ".md" ]; then
 
     	echo -e "${yellow}Exporting markdown file ${italic}$ScriptWorkDir/liste_mammiferes$ext !${reset}"
-    	mammifere=$(echo "$mammiferes" | sed 's|/||g')
-    	echo -e "$mammifere" > "liste_mammiferes$ext"
+
+    	for val in "${!index[@]}"
+    	do
+    		md_index+="[${index[$val]}](#lettre-$((val+1))) | "
+    	done
+    	md_index="${md_index:0:-3}"
+
+    	echo -e "# Liste nature"'\n''\n'"$md_index"'\n''\n'"$mammiferes" > "liste_mammiferes$ext"
     fi
 
     exit 0
@@ -193,10 +249,14 @@ body {
 }
 table {
 	width: 100%;
+	border-collapse: separate;
+	border-spacing: 0;
+	border-top: 1px solid black;
+	border-left: 1px solid black;
 }
-table, th, td {
-	border: 1px solid black;
-	border-collapse: collapse;
+th, td {
+	border-right: 1px solid black;
+	border-bottom: 1px solid black;
 	padding: 10px;
 }
 caption {
@@ -241,6 +301,18 @@ a:hover {
 .td25 {
 	width: 25%;
 }
+#search {
+	display: block;
+	margin: 0 auto 16px auto;
+	padding: 8px 12px;
+	width: 300px;
+	font-size: 16px;
+	border: 1px solid #aaa;
+	border-radius: 4px;
+}
+.item-hidden {
+	display: none !important;
+}
 </style>
 <link rel="stylesheet" href="">
 <!--[if lt IE 9]>
@@ -252,13 +324,26 @@ a:hover {
 <body>
 
 
-<br /><br />
+<br />
+<input type="text" id="search" placeholder="Rechercher..." oninput="filterTable()">
 <table id="anchor-cask">
 <caption>Liste mammifères.</caption>
 <div class='index'>$liens_index</div>
 $mammiferes
 </table>
 
+<script>
+function filterTable() {
+    var q = document.getElementById('search').value.toLowerCase();
+    document.querySelectorAll('tr.textcenter').forEach(function(r) {
+        r.classList.toggle('item-hidden', !!q);
+    });
+    document.querySelectorAll('tbody.item').forEach(function(group) {
+        var bird = group.querySelector('tr.bird');
+        var match = !q || bird.textContent.toLowerCase().includes(q);
+        group.classList.toggle('item-hidden', !match);
+    });
+}</script>
 </body>
 </html>
 EOF
