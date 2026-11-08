@@ -35,14 +35,11 @@ RawUrl="https://x-access-token:$GITHUB_TOKEN@raw.githubusercontent.com/Bruno21/b
 
 
 red="\033[1;31m"
-greenbold="\033[1;32m"
 green="\033[0;32m"
 yellow="\033[0;33m"
 yellowbold="\033[1;33m"
 bold="\033[1m"
 italic="\033[3m"
-#bold_under="\033[1;4m"
-underline="\033[4m"
 reset="\033[0m"
 
 
@@ -51,7 +48,7 @@ echo -e "${yellowbold}Bashnature${reset} $VERSION\n"
 
 ### Help Function:
 Help() {
-  echo "Syntax:     bashnature.sh [OPTION]" 
+  echo "Syntax:     bashnature.sh [OPTION]"
   echo "Example:    bashnature.sh -s renard"
   echo
   echo "Options:"
@@ -67,45 +64,44 @@ Help() {
 
 req2() {
 	option=$1
-	
+
 	case $option in
   	e) ext=".md" ;;
   	w) ext=".html";old_index="_" ;;
 	esac
-	
+
 	f="liste_mammiferes$ext"
 	if [ -f "./$f" ]; then
 		rm "./$f"
 	fi
-	
+
     query2="SELECT Francais, Autres, Latin, Anglais, Ordre, Famille, Liens, Male, Femelle, Jeune FROM liste;"
-    result2=$(sqlite3 "$ScriptWorkDir/mammiferes.db" "$query2")    
+    result2=$(sqlite3 "$ScriptWorkDir/mammiferes.db" "$query2")
     #echo "$result2"
-	
-	i=1
+
 	index=()
     array=()
    	while IFS='|' read -ra array;
 	do
 	    fr="${array[0]}"
         aut="${array[1]}"
-        
+
         lat="${array[2]}"
         en="${array[3]}"
         or="${array[4]}"
         fa="${array[5]}"
         ln="${array[6]}"
- 
+
         ma="${array[7]}"
         fe="${array[8]}"
         je="${array[9]}"
 
- 
-        
+
+
         [[ $aut != "" ]] && z="($aut)" || z=""
-		
-		if [ $ext = ".md" ]; then
-			
+
+		if [ "$ext" = ".md" ]; then
+
         	#echo "| $fr $z |" >>"$f"
         	#echo "|--------------------------------------------------|" >>"$f"
         	#echo "| $lat |" >> "$f"
@@ -114,7 +110,7 @@ req2() {
         	#echo "| $fa |" >> "$f"
         	#echo "| $ln |" >> "$f"
         	#echo "" >> "$f"
-        	
+
         	mammiferes+="| $fr | $z |"'\n'
         	mammiferes+="|------------------------ | --------------------------|"'\n'
         	mammiferes+="| Vernaculaire | $lat |"'\n'
@@ -127,12 +123,12 @@ req2() {
         	#birds+="| Liens (oiseaux.net)<br />![](/Users/bruno/Pictures/Transparent300px.png) | [$fr]($ln)<br />![](/Users/bruno/Pictures/Transparent300px.png) |"'\n'
         	mammiferes+="| Liens (wikipedia)<br />![](Transparent300px.png) | [$fr]($ln)<br />![](Transparent300px.png) |"'\n'
         	mammiferes+='\n'
-        	
-        elif [ $ext = ".html" ]; then
-        
+
+        elif [ "$ext" = ".html" ]; then
+
        		firstletter="${fr:0:1}"
-        	
-        	if [ $firstletter != $old_index ]; then
+
+        	if [ "$firstletter" != "$old_index" ]; then
         		index+=("$firstletter")
         		#bird+="<tr class='bird'><td class='bold'><a href='#$firstletter'></a>$fr</td><td>$aut</td><td>$lat</td><td>$en</td></tr>"
         		bird+="<tr class='bird'><td class='bold'><a id='$firstletter'></a>$fr</td><td>$aut</td><td>$lat</td><td>$en</td></tr>"
@@ -140,7 +136,7 @@ req2() {
         		bird+="<tr class='bird'><td class='bold'>$fr</td><td>$aut</td><td>$lat</td><td>$en</td></tr>"
         	fi
         	bird+="<tr class='family'><td>$or</td><td>$fa</td><td></td><td><a href='$ln'>Wikipedia</a></tr>"
-        	if [ $firstletter != $old_index ]; then
+        	if [ "$firstletter" != "$old_index" ]; then
         		bird+="<tr class='family textcenter'><td colspan='4'>PLACEHOLDER</td></tr>"
         	else
         		bird+="<tr class='family'><td colspan='4'></td></tr>"
@@ -150,33 +146,33 @@ req2() {
         fi
 
     done <<< "$result2"
-    
-    if [ $ext = ".html" ]; then
+
+    if [ "$ext" = ".html" ]; then
     	newArr=(); while IFS= read -r -d '' x; do newArr+=("$x"); done < <(printf "%s\0" "${index[@]}" | sort -uz)
-    	
-    	for val in ${!newArr[@]}
+
+    	for val in "${!newArr[@]}"  # for val in ${!newArr[@]}
     	do
     		liens_index+="<a href='#${newArr[$val]}'>${newArr[$val]}</a> | "
     	done
 		liens_index="${liens_index:0:-3}"
 		z=${bird//PLACEHOLDER/$liens_index}
 		mammiferes="$z"
-		
+
     	html
-    elif [ $ext = ".md" ]; then
-    	
+    elif [ "$ext" = ".md" ]; then
+
     	echo -e "${yellow}Exporting markdown file ${italic}$ScriptWorkDir/liste_mammiferes$ext !${reset}"
-    	mammifere=$(echo "$mammiferes" | sed 's/\//g')
+    	mammifere=$(echo "$mammiferes" | sed 's/\//g')
     	echo -e "$mammifere" > "liste_mammiferes$ext"
     fi
-    
+
     exit 0
     }
-    
+
 html() {
 
 echo -e "${yellow}Exporting html file ${italic}$ScriptWorkDir/liste_mammiferes.html !${reset}"
-        	
+
 cat > liste_mammiferes.html << EOF
 <!DOCTYPE html>
 <html>
@@ -271,17 +267,17 @@ EOF
 
 req1() {
 	echo -e "${bold}Recherche: <$1>${reset}"
-	
+
 	request="$1"
-	if [[ "${request,,}" == "all" ]]; then 
-		request=""; 
+	if [[ "${request,,}" == "all" ]]; then
+		request="";
 	fi
-	
+
 	request=$(echo "$request" | sed 'y/áàâäçéèêëîïìôöóùúüñÂÀÄÇÉÈÊËÎÏÔÖÙÜÑ/aaaaceeeeiiiooouuunAAACEEEEIIOOUUN/')
 
     query1="SELECT * FROM liste WHERE Fra LIKE \"%$request%\" OR Aut LIKE \"%$request%\" OR Latin LIKE \"%$request%\"";
     result1=$(sqlite3 "$ScriptWorkDir/nature.db" "$query1")
-    
+
     if [ -n "$result1" ]; then
     	array2=()
     	keywords=()
@@ -289,7 +285,7 @@ req1() {
    		while IFS='|' read -ra array2;
 		do
 			# (Francais, Fra, Autres, Aut, Male, Femelle, Jeune, Others, Latin, Anglais, Male_en, Femelle_en, Jeune_en, Ordre, Famille, Liens, Divers)
-			
+
 			fr2="${array2[0]}"		# Francais
         	aut2="${array2[2]}"		# Autres
         	ma2="${array2[4]}"		# Male
@@ -300,12 +296,12 @@ req1() {
     	    en2="${array2[9]}"		# Anglais
          	ma_en2="${array2[10]}"	# Male_en
         	fe_en2="${array2[11]}"	# Femelle_en
-        	je_en2="${array2[12]}"	# Jeune_en    
+        	je_en2="${array2[12]}"	# Jeune_en
         	or2="${array2[13]}"		# Ordre
 	        fa2="${array2[14]}"		# Famille
     	    lnk2="${array2[15]}"	# Liens
     	    div2="${array2[16]}"	# Divers
-        
+
         	tag2="$fr2"
         	[ -n "$aut2" ] && tag2+=",$aut2";
         	if [ $opt_male = true ]; then
@@ -323,11 +319,11 @@ req1() {
 			[ -n "$oth2" ] && tag2+=",$oth2";
 			[ -n "$lat2" ] && tag2+=",$lat2";
 			[ -n "$en2" ] && tag2+=",$en2";
-			
+
 			[ -n "$or2" ] && tag2+=",$or2";
         	[ -n "$fa2" ] && tag2+=",$fa2";
         	[ -n "$div2" ] && tag2+=",$div2";
-        	
+
 	        echo
     		printf "\e[1m| %-4s | %-25s | %-20s | %-20s | %-18s | %-15s | %-20s \e[0m\n" "$cmpt" "$fr2" "$lat2" "$en2" "$or2" "$fa2" "$aut2"
         	printf "\e[0m| %-4s | %-50s \e[0m\n" "$cmpt" "$lnk2"
@@ -335,8 +331,8 @@ req1() {
     	    keywords+=("$tag2")
         	cmpt=$((cmpt+1))
 	    done <<< "$result1"
-    
-	    choose=$(echo -e "\nChoose a number to get keywords in your clipboard (<q> to quit): ") 
+
+	    choose=$(echo -e "\nChoose a number to get keywords in your clipboard (<q> to quit): ")
     	read -e -p "$choose" choice
 
 	    re='^[0-9]+$'
@@ -363,13 +359,13 @@ req1() {
 
 self_update_curl() {
   cp "$ScriptPath" "$ScriptPath".bak
-  if [[ $(builtin type -P curl) ]]; then 
-    curl -L $RawUrl > "$ScriptPath" ; chmod +x "$ScriptPath"  
+  if [[ $(builtin type -P curl) ]]; then
+    curl -L "$RawUrl" > "$ScriptPath" ; chmod +x "$ScriptPath"
     printf "\n%s\n" "--- starting over with the updated version ---"
     exec "$ScriptPath" "${ScriptArgs[@]}"  # run the new script with old arguments
     exit 1 # exit the old instance
-  elif [[ $(builtin type -P wget) ]]; then 
-    wget $RawUrl -O "$ScriptPath" ; chmod +x "$ScriptPath"
+  elif [[ $(builtin type -P wget) ]]; then
+    wget "$RawUrl" -O "$ScriptPath" ; chmod +x "$ScriptPath"
     printf "\n%s\n" "--- starting over with the updated version ---"
     exec "$ScriptPath" "${ScriptArgs[@]}" # run the new script with old arguments
     exit 1 # exit the old instance
@@ -395,7 +391,7 @@ self_update() {
 
 check_version() {
 	curl -Is https://www.github.com | head -1 | grep 301 1>/dev/null
-	if [[ $? -eq 1 ]]; then	
+	if [[ $? -eq 1 ]]; then
 		echo -e "\n${red}No GitHub connection !${reset}"
 	else
 
@@ -405,9 +401,9 @@ check_version() {
 		LatestChanges="$(curl -s -r 0-2000 $RawUrl | grep "^### ChangeNotes:" | sed 's/### ChangeNotes://g')"
 
 		### Version check & initiate self update
-		if [[ "$VERSION" != "$LatestRelease" ]] ; then 
-			printf "New version available! %b%s%b ⇒ %b%s%b \nChange Notes:\n%s \n" "$c_yellow" "$VERSION" "$c_reset" "$c_green" "$LatestRelease" "$c_reset" "$LatestChanges"
-			if [[ -z "$AutoUp" ]] ; then 
+		if [[ "$VERSION" != "$LatestRelease" ]] ; then
+			printf "New version available! %b%s%b ⇒ %b%s%b \nChange Notes:\n%s \n" "${yellow}" "$VERSION" "${reset}" "${green}" "$LatestRelease" "${reset}" "$LatestChanges"
+			if [[ -z "$AutoUp" ]] ; then
 				read -r -p "Would you like to update? y/[n]: " SelfUpdate
     			[[ "$SelfUpdate" =~ [yY] ]] && self_update
   			fi
@@ -423,7 +419,7 @@ if [ ! -f "$ScriptWorkDir/nature.db" ]; then
 else
     query="SELECT COUNT(Francais) FROM liste";
     result5=$(sqlite3 "$ScriptWorkDir/nature.db" "$query")
-    
+
    	if [ -n "$result5" ]; then
    		echo -e "\n${bold}A nature database that return keywords for Lightroom.${reset}"
    		echo -e "$result5 objects founds in database...\n"
