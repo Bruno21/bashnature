@@ -523,6 +523,12 @@ while getopts "s:hewmfju" options; do
 done
 shift "$((OPTIND-1))"
 
+# Leftover words mean an unquoted search term, whose tail would be dropped silently
+if [ "$#" -gt 0 ]; then
+	echo -e "${yellow}Warning: ignored extra arguments: $*${reset}"
+	echo -e "${yellow}Quote the search term, e.g. -s \"Belette d'Europe\"${reset}\n"
+fi
+
 if [ -z "$search" ]; then
 	Help
 	exit 2
