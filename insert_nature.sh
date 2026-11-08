@@ -16,10 +16,10 @@ if [ ! -d "$SRC" ]; then
 	exit 1
 fi
 
-if [ ! -f "./$database" ]; then
+if [ ! -f "$ScriptDir/$database" ]; then
 	cmd0="CREATE TABLE liste (Francais string, Fra string, Autres string, Aut string, Male string, Femelle string, Jeune string, Others string, Latin string, Anglais string, Male_en string, Femelle_en string, Jeune_en string, Ordre string, Famille string, Liens string, Divers string, UNIQUE(Francais));"
 
-	echo "$cmd0" | sqlite3 "./$database"
+	echo "$cmd0" | sqlite3 "$ScriptDir/$database"
 
 	if [ $? -ne 0 ]; then exit 0; fi
 fi
@@ -105,10 +105,10 @@ do
             cmd1="INSERT OR REPLACE INTO liste (Francais, Fra, Autres, Aut, Male, Femelle, Jeune, Others, Latin, Anglais, Male_en, Femelle_en, Jeune_en, Ordre, Famille, Liens, Divers) VALUES ('$fr','$fr_wa','$aut','$aut_wa','$male','$femelle','$jeune','$others','$latin','$english','$male_en','$femelle_en','$jeune_en','$ordre','$famille','$lien','$typ');"
 
             #echo "$cmd1"
-            echo "$cmd1" | sqlite3 "./$database"
+            echo "$cmd1" | sqlite3 "$ScriptDir/$database"
             if [ ! $? -eq 0 ]; then
-  				echo "$cmd1" >> errors.txt
-  				echo "" >> errors.txt
+  				echo "$cmd1" >> "$ScriptDir/errors.txt"
+  				echo "" >> "$ScriptDir/errors.txt"
   			else
 				((i++))
   			fi

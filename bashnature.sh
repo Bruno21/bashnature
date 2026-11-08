@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-VERSION="v0.6.1"
+VERSION="v0.7"
 
 ### Variables for self updating
 ScriptArgs=( "$@" )
@@ -10,6 +10,14 @@ ScriptWorkDir="$(dirname "$ScriptPath")"	# /Users/bruno/Documents/Scripts/bashan
 opt_male=false
 opt_femelle=false
 opt_jeune=false
+
+red="\033[1;31m"
+green="\033[0;32m"
+yellow="\033[0;33m"
+yellowbold="\033[1;33m"
+bold="\033[1m"
+italic="\033[3m"
+reset="\033[0m"
 
 # Get GITHUB_TOKEN from keychain with fnox
 [[ -z "${GITHUB_TOKEN}" ]] && echo -e "${red}\nNo Github token found ! Could'nt get update from Github.'.${reset}\n"
@@ -23,6 +31,7 @@ dotenv () {
 
 #dotenv # replaced by fnox
 
+### ChangeNotes: 0.7	Débugage avec Claude
 ### ChangeNotes: 0.6.1	Update help
 ### ChangeNotes: 0.6	Replace .env file by fnox
 ### ChangeNotes: 0.5	First version.
@@ -32,15 +41,6 @@ Github="https://github.com/bruno21/bashnature"
 #RawUrl="https://raw.githubusercontent.com/Bruno21/bashanimals/main/bashanimals.sh"
 # Private Repo:
 RawUrl="https://x-access-token:$GITHUB_TOKEN@raw.githubusercontent.com/Bruno21/bashnature/main/bashnature.sh"
-
-
-red="\033[1;31m"
-green="\033[0;32m"
-yellow="\033[0;33m"
-yellowbold="\033[1;33m"
-bold="\033[1m"
-italic="\033[3m"
-reset="\033[0m"
 
 
 echo -e "${yellowbold}Bashnature${reset} $VERSION\n"
@@ -76,7 +76,7 @@ req2() {
 	fi
 
     query2="SELECT Francais, Autres, Latin, Anglais, Ordre, Famille, Liens, Male, Femelle, Jeune FROM liste;"
-    result2=$(sqlite3 "$ScriptWorkDir/mammiferes.db" "$query2")
+    result2=$(sqlite3 "$ScriptWorkDir/nature.db" "$query2")
     #echo "$result2"
 
 	index=()
@@ -162,7 +162,7 @@ req2() {
     elif [ "$ext" = ".md" ]; then
 
     	echo -e "${yellow}Exporting markdown file ${italic}$ScriptWorkDir/liste_mammiferes$ext !${reset}"
-    	mammifere=$(echo "$mammiferes" | sed 's/\//g')
+    	mammifere=$(echo "$mammiferes" | sed 's|/||g')
     	echo -e "$mammifere" > "liste_mammiferes$ext"
     fi
 
@@ -274,6 +274,7 @@ req1() {
 	fi
 
 	request=$(echo "$request" | sed 'y/áàâäçéèêëîïìôöóùúüñÂÀÄÇÉÈÊËÎÏÔÖÙÜÑ/aaaaceeeeiiiooouuunAAACEEEEIIOOUUN/')
+	request=$(echo "$request" | sed "s/'/''/g")
 
     query1="SELECT * FROM liste WHERE Fra LIKE \"%$request%\" OR Aut LIKE \"%$request%\" OR Latin LIKE \"%$request%\"";
     result1=$(sqlite3 "$ScriptWorkDir/nature.db" "$query1")
@@ -344,8 +345,10 @@ req1() {
     		if [ "$choice" -ge 1 ] && [ "$choice" -le "$((cmpt-1))" ]; then
    				if [[ "$OSTYPE" == "linux-gnu" ]] && [ -x "$(command -v xsel)" ]; then
 					xsel -b <<<  "${keywords[$((choice-1))]}"
+					echo -e "${green}Copied to clipboard!${reset}"
 				elif [[ "$OSTYPE" == "darwin"* ]] && [ -x "$(command -v pbcopy)" ]; then
 					pbcopy <<<  "${keywords[$((choice-1))]}"
+					echo -e "${green}Copied to clipboard!${reset}"
 				fi
 			else echo -e "${red}Wrong index !${reset}"
 			fi
@@ -376,7 +379,7 @@ self_update_curl() {
 
 self_update() {
   cd "$ScriptWorkDir" || { printf "Path error, skipping update.\n" ; return ; }
-  if [[ $(builtin type -P git) ]] && [[ "$(git ls-remote --get-url 2>/dev/null)" =~ .*"mag37/dockcheck".* ]] ; then
+  if [[ $(builtin type -P git) ]] && [[ "$(git ls-remote --get-url 2>/dev/null)" =~ .*"bruno21/bashnature".* ]] ; then
     printf "\n%s\n" "Pulling the latest version."
     git pull --force || { printf "Git error, manually pull/clone.\n" ; return ; }
     printf "\n%s\n" "--- starting over with the updated version ---"
@@ -396,9 +399,9 @@ check_version() {
 	else
 
 		### Check if there's a new release of the script:
-		LatestRelease="$(curl -s -r 0-50 $RawUrl | sed -n "/VERSION/s/VERSION=//p" | tr -d '"')"
-		#LatestChanges="$(curl -s -r 0-2000 $RawUrl | sed -n "/ChangeNotes/s/# ChangeNotes: //p")"
-		LatestChanges="$(curl -s -r 0-2000 $RawUrl | grep "^### ChangeNotes:" | sed 's/### ChangeNotes://g')"
+		LatestRelease="$(curl -s -r 0-50 "$RawUrl" | sed -n "/VERSION/s/VERSION=//p" | tr -d '"')"
+		#LatestChanges="$(curl -s -r 0-2000 "$RawUrl" | sed -n "/ChangeNotes/s/# ChangeNotes: //p")"
+		LatestChanges="$(curl -s -r 0-2000 "$RawUrl" | grep "^### ChangeNotes:" | sed 's/### ChangeNotes://g')"
 
 		### Version check & initiate self update
 		if [[ "$VERSION" != "$LatestRelease" ]] ; then
@@ -427,10 +430,6 @@ else
    	fi
 fi
 
-opt_male=false;
-opt_femelle=false;
-opt_jeune=false;
-
 while getopts "s:hewmfju" options; do
   case "${options}" in
    # a)  req1 "${OPTARG}" ;;
@@ -444,5 +443,10 @@ while getopts "s:hewmfju" options; do
   esac
 done
 shift "$((OPTIND-1))"
+
+if [ -z "$search" ]; then
+	Help
+	exit 2
+fi
 
 req1 "$search"
