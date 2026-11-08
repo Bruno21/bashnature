@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-VERSION="v0.7"
+VERSION="v1.0"
 
 ### Variables for self updating
 ScriptArgs=( "$@" )
-ScriptPath="$(readlink -f "$0")"			# /Users/bruno/Documents/Scripts/bashanimals/bashanimals.sh
-ScriptWorkDir="$(dirname "$ScriptPath")"	# /Users/bruno/Documents/Scripts/bashanimals
+ScriptPath="$(readlink -f "$0")"
+ScriptWorkDir="$(dirname "$ScriptPath")"
 
 opt_male=false
 opt_femelle=false
@@ -31,6 +31,7 @@ dotenv () {
 
 #dotenv # replaced by fnox
 
+### ChangeNotes: 1.0	Ajout d'un champ recherche dans l'export HTML (Claude)
 ### ChangeNotes: 0.7	Débugage avec Claude
 ### ChangeNotes: 0.6.1	Update help
 ### ChangeNotes: 0.6	Replace .env file by fnox
@@ -70,14 +71,13 @@ req2() {
   	w) ext=".html";old_index="_" ;;
 	esac
 
-	f="liste_nature$ext"
+	f="bashnature$ext"
 	if [ -f "./$f" ]; then
 		rm "./$f"
 	fi
 
     query2="SELECT Francais, Autres, Latin, Anglais, Ordre, Famille, Liens, Male, Femelle, Jeune, Fra FROM liste ORDER by Fra;"
     result2=$(sqlite3 "$ScriptWorkDir/nature.db" "$query2")
-    #echo "$result2"
 
 	index=()
 	itemcount=0
@@ -97,8 +97,6 @@ req2() {
         fe="${array[8]}"
         je="${array[9]}"
         fra="${array[10]}"
-
-
 
         [[ $aut != "" ]] && z="($aut)" || z=""
 
@@ -122,15 +120,6 @@ req2() {
 
 		if [ "$ext" = ".md" ]; then
 
-        	#echo "| $fr $z |" >>"$f"
-        	#echo "|--------------------------------------------------|" >>"$f"
-        	#echo "| $lat |" >> "$f"
-        	#echo "| $en |" >> "$f"
-        	#echo "| $or |" >> "$f"
-        	#echo "| $fa |" >> "$f"
-        	#echo "| $ln |" >> "$f"
-        	#echo "" >> "$f"
-
         	# Letter heading with an explicit anchor, independent of the renderer's slug rules
         	if [ "$newletter" = true ]; then
         		mammiferes+="<a id='$letterid'></a>"'\n''\n'"## $firstletter"'\n''\n'
@@ -145,7 +134,6 @@ req2() {
         	[ -n "$je" ] && mammiferes+="| Jeune | $je |"'\n'
         	mammiferes+="| Ordre | $or |"'\n'
         	mammiferes+="| Famille | $fa |"'\n'
-        	#birds+="| Liens (oiseaux.net)<br />![](/Users/bruno/Pictures/Transparent300px.png) | [$fr]($ln)<br />![](/Users/bruno/Pictures/Transparent300px.png) |"'\n'
         	[ -n "$linklabel" ] && mammiferes+="| Liens ($linklabel)<br />![](Transparent300px.png) | [$fr]($ln)<br />![](Transparent300px.png) |"'\n'
         	mammiferes+='\n'
 
@@ -211,7 +199,7 @@ req2() {
     	html
     elif [ "$ext" = ".md" ]; then
 
-    	echo -e "${yellow}Exporting markdown file ${italic}$ScriptWorkDir/liste_mammiferes$ext !${reset}"
+    	echo -e "${yellow}Exporting markdown file ${italic}$ScriptWorkDir/bashnature$ext !${reset}"
 
     	for val in "${!index[@]}"
     	do
@@ -219,7 +207,7 @@ req2() {
     	done
     	md_index="${md_index:0:-3}"
 
-    	echo -e "# Liste nature"'\n''\n'"$md_index"'\n''\n'"$mammiferes" > "liste_mammiferes$ext"
+    	echo -e "# Liste nature"'\n''\n'"$md_index"'\n''\n'"$mammiferes" > "bashnature$ext"
     fi
 
     exit 0
@@ -227,9 +215,9 @@ req2() {
 
 html() {
 
-echo -e "${yellow}Exporting html file ${italic}$ScriptWorkDir/liste_mammiferes.html !${reset}"
+echo -e "${yellow}Exporting html file ${italic}$ScriptWorkDir/bashnature.html !${reset}"
 
-cat > liste_mammiferes.html << EOF
+cat > bashnature.html << EOF
 <!DOCTYPE html>
 <html>
 <head>
@@ -517,7 +505,7 @@ fi
 
 while getopts "s:hewmfju" options; do
   case "${options}" in
-   # a)  req1 "${OPTARG}" ;;
+   	# a)  req1 "${OPTARG}" ;;
     s) search="${OPTARG}";;
     e|w)  req2 "${options}" ;;
     m)	opt_male=true;;
