@@ -11,6 +11,11 @@ database="nature.db"
 ScriptDir="$(cd "$(dirname "$0")" && pwd)"
 SRC="$ScriptDir/Nature"
 
+if [ ! -x "$(command -v sqlite3)" ]; then
+	echo -e "\033[1;31msqlite3 not found ! Install it to use this script.\033[0m"
+	exit 1
+fi
+
 if [ ! -d "$SRC" ]; then
 	echo -e "\033[1;31mNature/ directory not found: $SRC\033[0m"
 	exit 1
@@ -19,9 +24,10 @@ fi
 if [ ! -f "$ScriptDir/$database" ]; then
 	cmd0="CREATE TABLE liste (Francais string, Fra string, Autres string, Aut string, Male string, Femelle string, Jeune string, Others string, Latin string, Anglais string, Male_en string, Femelle_en string, Jeune_en string, Ordre string, Famille string, Liens string, Divers string, UNIQUE(Francais));"
 
-	echo "$cmd0" | sqlite3 "$ScriptDir/$database"
-
-	if [ $? -ne 0 ]; then exit 0; fi
+	if ! echo "$cmd0" | sqlite3 "$ScriptDir/$database"; then
+		echo -e "\033[1;31mCould not create table in $database\033[0m"
+		exit 1
+	fi
 fi
 
 
@@ -77,27 +83,28 @@ do
             famille="${array[14]}"
             lien="${array[15]}"
 
-            fr=$(echo "$fr" | sed "s/'/''/g")
+            # Double single quotes for SQL, in bash to avoid forking sed on every field
+            fr=${fr//\'/\'\'}
             #echo "$fr"
-            fr_wa=$(echo "$fr_wa" | sed "s/'/''/g")
-            aut=$(echo "$aut" | sed "s/'/''/g")
-            aut_wa=$(echo "$aut_wa" | sed "s/'/''/g")
+            fr_wa=${fr_wa//\'/\'\'}
+            aut=${aut//\'/\'\'}
+            aut_wa=${aut_wa//\'/\'\'}
 
-            male=$(echo "$male" | sed "s/'/''/g")
-            femelle=$(echo "$femelle" | sed "s/'/''/g")
-            jeune=$(echo "$jeune" | sed "s/'/''/g")
+            male=${male//\'/\'\'}
+            femelle=${femelle//\'/\'\'}
+            jeune=${jeune//\'/\'\'}
 
-            others=$(echo "$others" | sed "s/'/''/g")
+            others=${others//\'/\'\'}
             #echo "$others"
-            english=$(echo "$english" | sed "s/'/''/g")
+            english=${english//\'/\'\'}
 
-            ordre=$(echo "$ordre" | sed "s/'/''/g")
-            famille=$(echo "$famille" | sed "s/'/''/g")
-            latin=$(echo "$latin" | sed "s/'/''/g")
-            lien=$(echo "$lien" | sed "s/'/''/g")
-            male_en=$(echo "$male_en" | sed "s/'/''/g")
-            femelle_en=$(echo "$femelle_en" | sed "s/'/''/g")
-            jeune_en=$(echo "$jeune_en" | sed "s/'/''/g")
+            ordre=${ordre//\'/\'\'}
+            famille=${famille//\'/\'\'}
+            latin=${latin//\'/\'\'}
+            lien=${lien//\'/\'\'}
+            male_en=${male_en//\'/\'\'}
+            femelle_en=${femelle_en//\'/\'\'}
+            jeune_en=${jeune_en//\'/\'\'}
 
             #echo "$lien"
             #echo "$typ"

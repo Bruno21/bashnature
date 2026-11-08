@@ -487,6 +487,12 @@ check_version() {
 	fi
 }
 
+### sqlite3 is present or not ?
+if [ ! -x "$(command -v sqlite3)" ]; then
+    echo -e "${red}sqlite3 not found ! Install it to use this script.${reset}"
+    exit 1
+fi
+
 ### Database is present or not ?
 if [ ! -f "$ScriptWorkDir/nature.db" ]; then
     echo -e "${red}No database found !${reset}"
