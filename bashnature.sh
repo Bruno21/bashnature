@@ -51,6 +51,7 @@ echo -e "${yellowbold}Bashnature${reset} $VERSION\n"
 Help() {
   echo "Syntax:     bashnature.sh [OPTION]"
   echo "Example:    bashnature.sh -s renard"
+  echo "            bashnature.sh -s \"Belette d'Europe\"   (quote multi-word terms)"
   echo
   echo "Options:"
   echo "-s     -s <subject>, -s all."
