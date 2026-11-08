@@ -347,7 +347,7 @@ req1() {
 	fi
 
 	request=$(echo "$request" | sed 'y/áàâäçéèêëîïìôöóùúüñÂÀÄÇÉÈÊËÎÏÔÖÙÜÑ/aaaaceeeeiiiooouuunAAACEEEEIIOOUUN/')
-	request=$(echo "$request" | sed "s/'/''/g")
+	request=${request//\'/\'\'}
 
     query1="SELECT * FROM liste WHERE Fra LIKE \"%$request%\" OR Aut LIKE \"%$request%\" OR Latin LIKE \"%$request%\"";
     result1=$(sqlite3 "$ScriptWorkDir/nature.db" "$query1")
