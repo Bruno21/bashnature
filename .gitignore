@@ -3,3 +3,14 @@ fnox.toml
 /.markdownlint.yaml
 /.pre-commit-config.yaml
 /.shellcheckrc
+
+# Exports, regenerated with -w and -e
+/bashnature.html
+/bashnature.md
+
+# Failed inserts, written by insert_nature.sh
+/errors.txt
+
+# Backups, including the copy kept by the self-update
+/Nature.bak.xls
+*.bak
