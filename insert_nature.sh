@@ -8,7 +8,13 @@ underline="\033[4m"
 reset="\033[0m"
 
 database="nature.db"
-SRC="$(pwd)/Nature"
+ScriptDir="$(cd "$(dirname "$0")" && pwd)"
+SRC="$ScriptDir/Nature"
+
+if [ ! -d "$SRC" ]; then
+	echo -e "\033[1;31mNature/ directory not found: $SRC\033[0m"
+	exit 1
+fi
 
 if [ ! -f "./$database" ]; then
 	cmd0="CREATE TABLE liste (Francais string, Fra string, Autres string, Aut string, Male string, Femelle string, Jeune string, Others string, Latin string, Anglais string, Male_en string, Femelle_en string, Jeune_en string, Ordre string, Famille string, Liens string, Divers string, UNIQUE(Francais));"
@@ -37,6 +43,9 @@ do
 		typ="Oiseau,Bird"
 	elif [[ "$FILE" == *Plantes* ]]; then
 		typ="Plante,Plant"
+	else
+		echo -e "\033[1;31mUnknown type for file $x, skipping.\033[0m"
+		continue
 	fi
 
 	i=0
@@ -84,6 +93,11 @@ do
 
             ordre=$(echo "$ordre" | sed "s/'/''/g")
             famille=$(echo "$famille" | sed "s/'/''/g")
+            latin=$(echo "$latin" | sed "s/'/''/g")
+            lien=$(echo "$lien" | sed "s/'/''/g")
+            male_en=$(echo "$male_en" | sed "s/'/''/g")
+            femelle_en=$(echo "$femelle_en" | sed "s/'/''/g")
+            jeune_en=$(echo "$jeune_en" | sed "s/'/''/g")
 
             #echo "$lien"
             #echo "$typ"
