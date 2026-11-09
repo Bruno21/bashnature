@@ -165,3 +165,9 @@ vient d'être annoncée.
 | `errors.txt` | généré, insertions en échec uniquement |
 | `README.md` | version anglaise |
 | `README.fr.md` | ce document |
+| `LICENSE` | texte complet de la GNU GPL v3 |
+
+## Licence
+
+Ce projet est diffusé sous licence publique générale GNU, version 3. Le texte
+complet se trouve dans [LICENSE](LICENSE).

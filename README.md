@@ -158,3 +158,9 @@ announced.
 | `errors.txt` | generated, failed inserts only |
 | `README.md` | this document |
 | `README.fr.md` | French translation |
+| `LICENSE` | full text of the GNU GPL v3 |
+
+## License
+
+This project is released under the GNU General Public License, version 3. See
+[LICENSE](LICENSE) for the full text.
